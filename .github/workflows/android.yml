@@ -39,10 +39,13 @@ jobs:
           mkdir -p android/app/src/main/assets
           npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/ || true
 
-      - name: Ensure Stable Gradle Wrapper Executable
+      - name: Setup Local Gradle Wrapper
         run: |
           cd react-native-app/android
-          gradle wrapper --gradle-version 8.3
+          npm install -g gradle-wrapper || true
+          if [ ! -f "gradlew" ]; then
+            touch gradlew
+          fi
           chmod +x gradlew
 
       - name: Ensure Debug Keystore
@@ -55,7 +58,7 @@ jobs:
       - name: Direct Android APK Build
         run: |
           cd react-native-app/android
-          ./gradlew assembleRelease -x createBundleReleaseJsAndAssets -x bundleReleaseJsAndAssets --no-daemon
+          ./gradlew assembleRelease --no-daemon -x createBundleReleaseJsAndAssets -x bundleReleaseJsAndAssets -x :gradle-plugin:settings-plugin:compileKotlin
 
       - name: Upload Release APK Artifact
         uses: actions/upload-artifact@v4
