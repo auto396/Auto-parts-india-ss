@@ -33,12 +33,11 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Generate React Native JS Bundle (Fix Bundle Error)
+      - name: Force Pre-bundle Assets Directory
         run: |
           cd react-native-app
           mkdir -p android/app/src/main/assets
-          rm -rf android/app/src/main/res/drawable-*
-          rm -rf android/app/src/main/res/raw
+          mkdir -p android/app/src/main/res/drawable-hdpi
           npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/ || true
 
       - name: Setup Gradle
@@ -65,15 +64,15 @@ jobs:
           cd react-native-app/android
           ./gradlew clean
 
-      - name: Build React Native Android Release APK
+      - name: Build React Native Android Release APK (Skip Auto JS Bundling)
         run: |
           cd react-native-app/android
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleRelease -x bundleReleaseJsAndAssets --no-daemon
 
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug -x bundleDebugJsAndAssets --no-daemon
 
       - name: Upload Release APK Artifact
         uses: actions/upload-artifact@v4
