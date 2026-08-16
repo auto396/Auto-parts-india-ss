@@ -39,10 +39,10 @@ jobs:
           mkdir -p android/app/src/main/assets
           npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/ || true
 
-      - name: Ensure Gradle Wrapper Executable
+      - name: Ensure Stable Gradle Wrapper Executable
         run: |
           cd react-native-app/android
-          gradle wrapper --gradle-version 8.8
+          gradle wrapper --gradle-version 8.3
           chmod +x gradlew
 
       - name: Ensure Debug Keystore
@@ -52,7 +52,7 @@ jobs:
             keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           fi
 
-      - name: Direct Android APK Build (Skip Auto Bundling)
+      - name: Direct Android APK Build
         run: |
           cd react-native-app/android
           ./gradlew assembleRelease -x createBundleReleaseJsAndAssets -x bundleReleaseJsAndAssets --no-daemon
