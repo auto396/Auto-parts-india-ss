@@ -3,20 +3,19 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
 react {
-    bundleInRelease = false
-    bundleInDebug = false
+    /* Folders, entrypoint, etc. */
 }
 
 android {
-    ndkVersion "25.1.8937393"
-    buildToolsVersion "34.0.0"
-    compileSdk 34
+    ndkVersion rootProject.ext.ndkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.autopartsindia"
     defaultConfig {
         applicationId "com.autopartsindia"
-        minSdkVersion 23
-        targetSdkVersion 34
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
     }
