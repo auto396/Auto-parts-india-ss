@@ -46,9 +46,10 @@ jobs:
             keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           fi
 
-      - name: Direct Android APK Build
+      - name: Generate Gradle Wrapper & Build APK
         run: |
           cd react-native-app/android
+          gradle wrapper --gradle-version 8.3
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon -x createBundleReleaseJsAndAssets -x bundleReleaseJsAndAssets
 
