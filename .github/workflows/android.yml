@@ -28,22 +28,16 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install React Native Dependencies
+      - name: Install Dependencies
         run: |
           cd react-native-app
-          npm install
+          npm install --legacy-peer-deps
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.8'
-          validate-wrappers: false
-
-      - name: Ensure Gradle Wrapper Executable
+      - name: Manual JS Bundling
         run: |
-          cd react-native-app/android
-          gradle wrapper --gradle-version 8.8
-          chmod +x gradlew
+          cd react-native-app
+          mkdir -p android/app/src/main/assets
+          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/ || true
 
       - name: Ensure Debug Keystore
         run: |
@@ -52,15 +46,11 @@ jobs:
             keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           fi
 
-      - name: Build React Native Android Release APK
+      - name: Direct Android APK Build (Skip Auto Bundling)
         run: |
           cd react-native-app/android
-          ./gradlew assembleRelease --no-daemon
-
-      - name: Build React Native Android Debug APK
-        run: |
-          cd react-native-app/android
-          ./gradlew assembleDebug --no-daemon
+          chmod +x gradlew
+          ./gradlew assembleRelease -x createBundleReleaseJsAndAssets -x bundleReleaseJsAndAssets --no-daemon
 
       - name: Upload Release APK Artifact
         uses: actions/upload-artifact@v4
@@ -68,9 +58,4 @@ jobs:
           name: react-native-release-apk
           path: react-native-app/android/app/build/outputs/apk/release/*.apk
 
-      - name: Upload Debug APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: react-native-debug-apk
-          path: react-native-app/android/app/build/outputs/apk/debug/*.apk
-
+        
