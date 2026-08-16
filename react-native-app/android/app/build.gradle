@@ -2,8 +2,13 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
+/**
+ * React Native configuration block to control JS bundling during build
+ */
 react {
-    /* Folders, entrypoint, etc. */
+    /* JS Auto-bundling-ஐ நிறுத்தி Pre-bundled assets-ஐ பயன்படுத்த வைக்கும் அமைப்பு */
+    bundleInRelease = false
+    bundleInDebug = false
 }
 
 android {
