@@ -1,8 +1,19 @@
-pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
-plugins { id("com.facebook.react.settings") }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ it.autolinkLibrariesFromCommand() }
+
+pluginManagement {
+    includeBuild("../node_modules/@react-native/gradle-plugin")
+}
+
+plugins {
+    id("com.facebook.react.settings")
+}
+
+extensions.configure(com.facebook.react.ReactSettingsExtension) {
+    // Autolink libraries properly without string index crash
+    it.autolinkLibrariesFromCommand()
+}
 
 rootProject.name = 'AutoPartsIndia'
 include ':app'
-includeBuild('../node_modules/@react-native/gradle-plugin')
 
+apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+applyNativeModulesSettingsGradle(settings)
