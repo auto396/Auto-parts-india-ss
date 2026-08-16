@@ -31,13 +31,7 @@ jobs:
       - name: Install React Native Dependencies
         run: |
           cd react-native-app
-          npm install --legacy-peer-deps
-
-      - name: Generate JS Bundle & Pre-create Assets
-        run: |
-          cd react-native-app
-          mkdir -p android/app/src/main/assets
-          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/ || true
+          npm install
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -58,20 +52,15 @@ jobs:
             keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           fi
 
-      - name: Clean Gradle Build
-        run: |
-          cd react-native-app/android
-          ./gradlew clean
-
       - name: Build React Native Android Release APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleRelease -x :app:bundleReleaseJsAndAssets --no-daemon
+          ./gradlew assembleRelease --no-daemon
 
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleDebug -x :app:bundleDebugJsAndAssets --no-daemon
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload Release APK Artifact
         uses: actions/upload-artifact@v4
@@ -84,3 +73,4 @@ jobs:
         with:
           name: react-native-debug-apk
           path: react-native-app/android/app/build/outputs/apk/debug/*.apk
+
