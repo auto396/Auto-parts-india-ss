@@ -35,10 +35,10 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      # 🔥 105-வது வரியில் உள்ள பிழையான வரியை நேரடியாக நீக்கும் எளிய கட்டளை
-      - name: Directly Remove Problematic Directories Line
+      # Safe Area Context & Directories பிரச்சனையை அடியோடு நீக்கும் பாதுகாப்பான கட்டளை
+      - name: Patch Problematic Gradle Files
         run: |
-          sed -i '/directories/d' react-native-app/node_modules/react-native-safe-area-context/android/build.gradle
+          sed -i '/directories/d' react-native-app/node_modules/react-native-safe-area-context/android/build.gradle || true
 
       - name: Inject google-services.json File
         run: |
@@ -89,10 +89,11 @@ jobs:
           </resources>
           EOF
 
+      # React Native 0.76-க்கு ஏற்ற 100% Stable Gradle 8.2.1
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.8'
+          gradle-version: '8.2.1'
           validate-wrappers: false
 
       - name: Ensure Executable Gradlew
@@ -110,12 +111,12 @@ jobs:
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          gradle assembleDebug --no-daemon -PkotlinVersion=1.9.24
+          ./gradlew assembleDebug --no-daemon
 
       - name: Build React Native Android Release APK
         run: |
           cd react-native-app/android
-          gradle assembleRelease --no-daemon -PkotlinVersion=1.9.24
+          ./gradlew assembleRelease --no-daemon
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
