@@ -35,26 +35,16 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Auto-generate Proper React Native Autolink settings.gradle
+      - name: Auto-generate Clean Android settings.gradle (Fix layout issue)
         run: |
           mkdir -p react-native-app/android
           cat << 'EOF' > react-native-app/android/settings.gradle
-          pluginManagement {
-              includeBuild("../node_modules/@react-native/gradle-plugin")
-          }
-          plugins {
-              id("com.facebook.react.settings")
-          }
-          extensions.configure(com.facebook.react.ReactSettingsExtension){
-              it.autolinkLibrariesFromCommand()
-          }
-
           rootProject.name = 'AutoPartsIndia'
           include ':app'
           includeBuild('../node_modules/@react-native/gradle-plugin')
           EOF
 
-      - name: Inject Kotlin Metadata & Compiler Flags (Fix Kotlin 2.2.0 Mismatch)
+      - name: Inject Kotlin Metadata & Compiler Flags
         run: |
           PROP_FILE="react-native-app/android/gradle.properties"
           echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> "$PROP_FILE"
@@ -63,8 +53,8 @@ jobs:
 
           BUILD_GRADLE="react-native-app/android/build.gradle"
           if [ -f "$BUILD_GRADLE" ]; then
-            sed -i 's/kotlinVersion = .*/kotlinVersion = "2.2.0"/' "$BUILD_GRADLE" || true
-            sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "2.2.0"/' "$BUILD_GRADLE" || true
+            sed -i 's/kotlinVersion = .*/kotlinVersion = "1.9.24"/' "$BUILD_GRADLE" || true
+            sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.24"/' "$BUILD_GRADLE" || true
           fi
 
           APP_BUILD_GRADLE="react-native-app/android/app/build.gradle"
@@ -208,12 +198,12 @@ jobs:
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleDebug --no-daemon -PkotlinVersion=2.2.0
+          ./gradlew assembleDebug --no-daemon -PkotlinVersion=1.9.24
 
       - name: Build React Native Android Release APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleRelease --no-daemon -PkotlinVersion=2.2.0
+          ./gradlew assembleRelease --no-daemon -PkotlinVersion=1.9.24
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
