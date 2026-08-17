@@ -139,6 +139,22 @@ jobs:
             exit 1
           fi
 
+      - name: Fix Safe Area Context Gradle Compatibility
+        run: |
+          FILE="react-native-app/node_modules/react-native-safe-area-context/android/build.gradle"
+
+          if [ -f "$FILE" ]; then
+            echo "Fixing react-native-safe-area-context Gradle compatibility..."
+
+            sed -i 's/\.directories /\.srcDirs /g' "$FILE"
+            sed -i 's/\.directories =/\.srcDirs =/g' "$FILE"
+
+            echo "Safe Area Context compatibility fix applied."
+          else
+            echo "ERROR: Safe Area Context build.gradle not found."
+            exit 1
+          fi
+
       - name: Clean Conflicting & Duplicate Resources
         run: |
           echo "==== Cleaning conflicting resources ===="
@@ -224,3 +240,4 @@ jobs:
         with:
           name: react-native-release-apk
           path: react-native-app/android/app/build/outputs/apk/release/*.apk
+```0
