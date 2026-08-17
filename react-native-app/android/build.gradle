@@ -36,4 +36,8 @@ subprojects { subproject ->
             }
         }
     }
+    // 🔥 சப்-ப்ரொஜெக்ட்டுகளுக்கு com.facebook.react பிளக்இன் கிடைக்க இந்த பிளாக் அவசியம்
+    pluginManager.withPlugin('com.facebook.react') {
+        // Plugin exists for native modules
+    }
 }
