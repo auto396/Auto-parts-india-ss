@@ -51,7 +51,7 @@ jobs:
           cd react-native-app/android
           gradle wrapper --gradle-version 8.3
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon -x createBundleReleaseJsAndAssets -x bundleReleaseJsAndAssets
+          ./gradlew :app:assembleDebug --no-daemon -x createBundleReleaseJsAndAssets -x bundleReleaseJsAndAssets
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
