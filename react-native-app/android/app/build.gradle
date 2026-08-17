@@ -1,3 +1,4 @@
+// React Native 0.76 Android app plugin setup
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
