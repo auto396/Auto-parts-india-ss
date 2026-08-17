@@ -35,7 +35,7 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Auto-generate Clean Android settings.gradle & Fix Build Memory
+      - name: Auto-generate Clean Android settings.gradle & Inject Global Kotlin Compatibility
         run: |
           mkdir -p react-native-app/android
           cat << 'EOF' > react-native-app/android/settings.gradle
@@ -44,12 +44,55 @@ jobs:
           includeBuild('../node_modules/@react-native/gradle-plugin')
           EOF
 
-          # Configure memory & AndroidX settings
+          # Configure memory & AndroidX settings in gradle.properties
           PROP_FILE="react-native-app/android/gradle.properties"
           echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> "$PROP_FILE"
           echo "kotlin.daemon.jvmargs=-Xmx2048m" >> "$PROP_FILE"
           echo "android.useAndroidX=true" >> "$PROP_FILE"
           echo "android.enableJetifier=true" >> "$PROP_FILE"
+
+          # Force JVM 17 and Kotlin compatibility across ALL modules
+          APP_BUILD_GRADLE="react-native-app/android/app/build.gradle"
+          if [ -f "$APP_BUILD_GRADLE" ]; then
+            cat << 'EOF' >> "$APP_BUILD_GRADLE"
+
+          subprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty("android")) {
+                      project.android {
+                          compileOptions {
+                              sourceCompatibility JavaVersion.VERSION_17
+                              targetCompatibility JavaVersion.VERSION_17
+                          }
+                          if (project.plugins.hasPlugin("kotlin-android") || project.plugins.hasPlugin("org.jetbrains.kotlin.android")) {
+                              kotlinOptions {
+                                  jvmTarget = "17"
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+
+          android {
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+              kotlinOptions {
+                  jvmTarget = "17"
+              }
+          }
+
+          configurations.all {
+              resolutionStrategy {
+                  force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.24'
+                  force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24'
+                  force 'org.jetbrains.kotlin:kotlin-reflect:1.9.24'
+              }
+          }
+          EOF
+          fi
 
       - name: Clean Conflicting & Duplicate Resources (BEFORE setup)
         run: |
@@ -183,12 +226,12 @@ jobs:
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon -PkotlinVersion=1.9.24
 
       - name: Build React Native Android Release APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleRelease --no-daemon -PkotlinVersion=1.9.24
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
