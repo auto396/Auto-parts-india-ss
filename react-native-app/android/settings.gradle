@@ -19,9 +19,3 @@ project(':app').projectDir = new File(rootProject.projectDir, 'app')
 
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle");
 applyNativeModulesSettingsGradle(settings)
-
-rootProject.allprojects { project ->
-    if (project != rootProject) {
-        project.plugins.apply("com.facebook.react")
-    }
-}

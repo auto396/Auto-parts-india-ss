@@ -25,6 +25,9 @@ allprojects {
         mavenCentral()
         maven { url 'https://www.jitpack.io' }
     }
+    plugins.withType(com.android.build.gradle.AppPlugin) {
+        it.project.plugins.apply("com.facebook.react")
+    }
 }
 
 subprojects { subproject ->
