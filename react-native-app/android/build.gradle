@@ -1,5 +1,4 @@
 buildscript {
-    // React Native 0.76 Android configuration
     ext {
         buildToolsVersion = "34.0.0"
         minSdkVersion = 24
@@ -24,20 +23,5 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://www.jitpack.io' }
-    }
-    plugins.withType(com.android.build.gradle.AppPlugin) {
-        it.project.plugins.apply("com.facebook.react")
-    }
-}
-
-subprojects { subproject ->
-    afterEvaluate {
-        if (subproject.hasProperty('android')) {
-            subproject.android {
-                buildFeatures {
-                    buildConfig = true
-                }
-            }
-        }
     }
 }
