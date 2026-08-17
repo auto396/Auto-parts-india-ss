@@ -16,7 +16,6 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # Node.js 20 ஆக மாற்றப்பட்டுள்ளது
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -31,7 +30,6 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # Install dependencies without skipping lifecycle scripts, then apply any local patches
       - name: Install Dependencies
         run: |
           cd react-native-app
@@ -104,7 +102,6 @@ jobs:
             keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" -storetype PKCS12
           fi
 
-      # Codespaces-இல் சேர்க்கப்பட்ட gradlew கோப்பைப் பயன்படுத்தி பில்ட் செய்தல்
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
