@@ -33,11 +33,17 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Fix Settings setup
+      - name: Fix Settings & Gradle Kotlin Alignment
         run: |
           cd react-native-app/android
           echo "rootProject.name = 'AutoPartsIndia'" > settings.gradle
           echo "include ':app'" >> settings.gradle
+
+          # Force compatible Kotlin version in build.gradle
+          if [ -f "build.gradle" ]; then
+            sed -i 's/kotlinVersion = .*/kotlinVersion = "1.9.24"/' build.gradle || true
+            sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.24"/' build.gradle || true
+          fi
 
       - name: Setup App Colors & Resources
         run: |
@@ -107,7 +113,7 @@ jobs:
           cd react-native-app/android
           gradle wrapper --gradle-version 8.4
           chmod +x gradlew
-          ./gradlew :app:assembleDebug --no-daemon
+          ./gradlew :app:assembleDebug --no-daemon -PkotlinVersion=1.9.24
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
