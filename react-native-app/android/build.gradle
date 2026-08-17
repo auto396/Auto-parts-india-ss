@@ -15,11 +15,10 @@ buildscript {
         classpath("com.android.tools.build:gradle:8.2.1")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("com.google.gms:google-services:4.4.1")
+        
+        // 🔥 React Native Gradle Plugin-ஐ நேரடி பாதையிலிருந்து சேர்க்கிறது:
+        classpath files("../node_modules/react-native/gradle/react.gradle")
     }
-}
-
-plugins {
-    id("com.facebook.react") version "0.73.0" apply false
 }
 
 allprojects {
