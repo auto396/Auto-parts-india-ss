@@ -1,4 +1,4 @@
- name: Build React Native Android APK
+name: Build React Native Android APK
 
 on:
   push:
@@ -30,79 +30,73 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install React Native Dependencies
-        run: |
-          cd react-native-app
-          npm install --legacy-peer-deps
-
-      - name: Auto-generate Clean Android settings.gradle
+      - name: Auto-generate Android settings.gradle
         run: |
           mkdir -p react-native-app/android
-          cat << 'EOF' > react-native-app/android/settings.gradle
+
+          if [ ! -f "react-native-app/android/settings.gradle" ]; then
+            echo "Generating clean settings.gradle..."
+
+            cat << 'EOF' > react-native-app/android/settings.gradle
+          pluginManagement {
+              includeBuild("../node_modules/@react-native/gradle-plugin")
+          }
+
+          plugins {
+              id("com.facebook.react.settings")
+          }
+
+          extensions.configure(com.facebook.react.ReactSettingsExtension) {
+              it.autolinkLibrariesFromCommand()
+          }
+
           rootProject.name = 'AutoPartsIndia'
           include ':app'
           includeBuild('../node_modules/@react-native/gradle-plugin')
           EOF
 
-          # Align Kotlin version in build.gradle if present
-          if [ -f "react-native-app/android/build.gradle" ]; then
-            sed -i 's/kotlinVersion = .*/kotlinVersion = "1.9.24"/' react-native-app/android/build.gradle || true
-            sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.24"/' react-native-app/android/build.gradle || true
+          else
+            echo "settings.gradle already exists. Verifying ':app' and rootProject inclusion..."
+
+            if ! grep -q "include ':app'" react-native-app/android/settings.gradle; then
+              echo "include ':app'" >> react-native-app/android/settings.gradle
+            fi
+
+            if ! grep -q "rootProject.name" react-native-app/android/settings.gradle; then
+              echo "rootProject.name = 'AutoPartsIndia'" >> react-native-app/android/settings.gradle
+            fi
           fi
 
-      - name: Setup App Colors & Silver Icon Resources
+      - name: Install React Native Dependencies
         run: |
-          RES_DIR="react-native-app/android/app/src/main/res"
-          mkdir -p "$RES_DIR/drawable"
-          mkdir -p "$RES_DIR/values"
-
-          # Update colors.xml with dark_navy & launcher background
-          cat << 'EOF' > "$RES_DIR/values/colors.xml"
-          <resources>
-              <color name="ic_launcher_background">#8E8E93</color>
-              <color name="dark_navy">#0F172A</color>
-              <color name="primary_blue">#0066FF</color>
-          </resources>
-          EOF
-
-          # Create Car & Gear Foreground Vector Icon
-          cat << 'EOF' > "$RES_DIR/drawable/ic_launcher_foreground.xml"
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="108dp"
-              android:height="108dp"
-              android:viewportWidth="108"
-              android:viewportHeight="108">
-              <path
-                  android:fillColor="#2C3E50"
-                  android:pathData="M54,30 A24,24 0 1,0 54,78 A24,24 0 1,0 54,30 Z M54,38 A16,16 0 1,1 54,70 A16,16 0 1,1 54,38 Z"/>
-              <path
-                  android:fillColor="#FF6B00"
-                  android:pathData="M35,58 L42,46 C43,44 45,43 48,43 L60,43 C63,43 65,44 66,46 L73,58 C76,58 78,60 78,63 L78,68 C78,70 76,71 74,71 L73,71 C73,69 71,67 68,67 C65,67 63,69 63,71 L45,71 C45,69 43,67 40,67 C37,67 35,69 35,71 L34,71 C32,71 30,70 30,68 L30,63 C30,60 32,58 35,58 Z"/>
-          </vector>
-          EOF
-
-          # Create Notification Icon
-          cat << 'EOF' > "$RES_DIR/drawable/ic_notification.xml"
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="24dp"
-              android:height="24dp"
-              android:viewportWidth="24"
-              android:viewportHeight="24">
-            <path
-                android:fillColor="#FFFFFF"
-                android:pathData="M12,2A2,2 0 0,0 10,4A2,2 0 0,0 10,4.29C7.12,5.14 5,7.82 5,11V17L3,19V20H21V19L19,17V11C19,7.82 16.88,5.14 14,4.29A2,2 0 0,0 14,4A2,2 0 0,0 12,2Z"/>
-          </vector>
-          EOF
+          cd react-native-app
+          npm install --legacy-peer-deps
 
       - name: Clean Conflicting & Duplicate Resources
         run: |
           echo "==== Step 1: Cleaning conflicting ic_launcher_background.xml files ===="
-          find react-native-app/android/app/src/main/res -name "ic_launcher_background.xml" ! -path "*/values/*" -exec rm -f {} \;
-          
+
+          find react-native-app/android/app/src/main/res \
+            -name "ic_launcher_background.xml" \
+            ! -path "*/values/*" \
+            -exec rm -f {} \;
+
           echo "==== Step 2: Preventing duplicate asset resources ===="
-          find react-native-app/android/app/src/main/res -type d -name "drawable-*" | while read -r dir; do
-            echo "Cleaning up generated assets in $dir to prevent AAPT duplicates"
-            find "$dir" -type f ! -name "splash_logo.png" ! -name "master_logo.png" ! -name "ic_notification.png" -name "*.png" -exec rm -f {} \;
+
+          find react-native-app/android/app/src/main/res \
+            -type d \
+            -name "drawable-*" | while read -r dir; do
+
+            echo "Cleaning up generated assets in $dir"
+
+            find "$dir" \
+              -type f \
+              ! -name "splash_logo.png" \
+              ! -name "master_logo.png" \
+              ! -name "ic_notification.png" \
+              -name "*.png" \
+              -exec rm -f {} \;
+
           done
 
       - name: Setup Gradle
@@ -120,9 +114,20 @@ jobs:
       - name: Ensure Debug Keystore
         run: |
           cd react-native-app/android/app
+
           if [ ! -f "debug.keystore" ]; then
             echo "debug.keystore is missing. Auto-generating development signing key..."
-            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" -storetype PKCS12
+
+            keytool -genkey -v \
+              -keystore debug.keystore \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US" \
+              -storetype PKCS12
           else
             echo "debug.keystore is already present."
           fi
@@ -130,10 +135,21 @@ jobs:
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleDebug --no-daemon -PkotlinVersion=1.9.24
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Build React Native Android Release APK
+        run: |
+          cd react-native-app/android
+          ./gradlew assembleRelease --no-daemon
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: react-native-debug-apk
           path: react-native-app/android/app/build/outputs/apk/debug/*.apk
+
+      - name: Upload Release APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: react-native-release-apk
+          path: react-native-app/android/app/build/outputs/apk/release/*.apk
