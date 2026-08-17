@@ -1,13 +1,17 @@
-plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("com.facebook.react")
-}
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
+
+project.ext.react = [
+    enableHermes: true
+]
+
+apply from: "../../node_modules/react-native/react.gradle"
 
 configurations.all {
     resolutionStrategy {
-        force 'org.jetbrains.kotlin:kotlin-stdlib:2.0.21'
-        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21'
+        force "org.jetbrains.kotlin:kotlin-stdlib:1.9.24"
+        force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24"
     }
 }
 
@@ -24,13 +28,16 @@ android {
         versionCode 1
         versionName "1.0.0"
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = "17"
     }
+
     buildFeatures {
         buildConfig true
     }
@@ -72,7 +79,7 @@ android {
 }
 
 dependencies {
-    implementation("com.facebook.react:react-android:+")
+    implementation("com.facebook.react:react-android")
     implementation platform("com.google.firebase:firebase-bom:33.7.0")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-messaging")
