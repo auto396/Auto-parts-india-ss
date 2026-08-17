@@ -10,11 +10,15 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        // 🔥 Node Modules-இல் உள்ள பிளக்இனை எடுக்க இந்த Repository அவசியம்
+        maven { url("../node_modules/@react-native/gradle-plugin") }
     }
     dependencies {
         classpath("com.android.tools.build:gradle:8.2.1")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("com.google.gms:google-services:4.4.1")
+        // 🔥 com.facebook.react பிளக்இன் கிடைக்க இந்த வரியை சேர்க்கவும்
+        classpath("com.facebook.react:react-native-gradle-plugin")
     }
 }
 
@@ -35,9 +39,5 @@ subprojects { subproject ->
                 }
             }
         }
-    }
-    // 🔥 சப்-ப்ரொஜெக்ட்டுகளுக்கு com.facebook.react பிளக்இன் கிடைக்க இந்த பிளாக் அவசியம்
-    pluginManager.withPlugin('com.facebook.react') {
-        // Plugin exists for native modules
     }
 }
