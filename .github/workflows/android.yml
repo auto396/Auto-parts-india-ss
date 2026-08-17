@@ -1,4 +1,4 @@
-name: Build React Native Android APK
+ name: Build React Native Android APK
 
 on:
   push:
@@ -30,40 +30,25 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Auto-generate Android settings.gradle & Fix Kotlin
-        run: |
-          mkdir -p react-native-app/android
-          if [ ! -f "react-native-app/android/settings.gradle" ]; then
-            echo "Generating clean settings.gradle..."
-            cat << 'EOF' > react-native-app/android/settings.gradle
-          pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
-          plugins { id("com.facebook.react.settings") }
-          extensions.configure(com.facebook.react.ReactSettingsExtension){ it.autolinkLibrariesFromCommand() }
-
-          rootProject.name = 'AutoPartsIndia'
-          include ':app'
-          includeBuild('../node_modules/@react-native/gradle-plugin')
-          EOF
-          else
-            echo "settings.gradle already exists. Verifying ':app' and rootProject inclusion..."
-            if ! grep -q "include ':app'" react-native-app/android/settings.gradle; then
-              echo "include ':app'" >> react-native-app/android/settings.gradle
-            fi
-            if ! grep -q "rootProject.name" react-native-app/android/settings.gradle; then
-              echo "rootProject.name = 'AutoPartsIndia'" >> react-native-app/android/settings.gradle
-            fi
-          fi
-
-          # Force compatible Kotlin version
-          if [ -f "react-native-app/android/build.gradle" ]; then
-            sed -i 's/kotlinVersion = .*/kotlinVersion = "1.9.24"/' react-native-app/android/build.gradle || true
-            sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.24"/' react-native-app/android/build.gradle || true
-          fi
-
       - name: Install React Native Dependencies
         run: |
           cd react-native-app
           npm install --legacy-peer-deps
+
+      - name: Auto-generate Clean Android settings.gradle
+        run: |
+          mkdir -p react-native-app/android
+          cat << 'EOF' > react-native-app/android/settings.gradle
+          rootProject.name = 'AutoPartsIndia'
+          include ':app'
+          includeBuild('../node_modules/@react-native/gradle-plugin')
+          EOF
+
+          # Align Kotlin version in build.gradle if present
+          if [ -f "react-native-app/android/build.gradle" ]; then
+            sed -i 's/kotlinVersion = .*/kotlinVersion = "1.9.24"/' react-native-app/android/build.gradle || true
+            sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.24"/' react-native-app/android/build.gradle || true
+          fi
 
       - name: Setup App Colors & Silver Icon Resources
         run: |
@@ -71,7 +56,7 @@ jobs:
           mkdir -p "$RES_DIR/drawable"
           mkdir -p "$RES_DIR/values"
 
-          # 1. Update colors.xml with dark_navy & launcher background
+          # Update colors.xml with dark_navy & launcher background
           cat << 'EOF' > "$RES_DIR/values/colors.xml"
           <resources>
               <color name="ic_launcher_background">#8E8E93</color>
@@ -80,25 +65,23 @@ jobs:
           </resources>
           EOF
 
-          # 2. Create Car & Gear Foreground Vector Icon
+          # Create Car & Gear Foreground Vector Icon
           cat << 'EOF' > "$RES_DIR/drawable/ic_launcher_foreground.xml"
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="108dp"
               android:height="108dp"
               android:viewportWidth="108"
               android:viewportHeight="108">
-              <!-- Mechanical Gear -->
               <path
                   android:fillColor="#2C3E50"
                   android:pathData="M54,30 A24,24 0 1,0 54,78 A24,24 0 1,0 54,30 Z M54,38 A16,16 0 1,1 54,70 A16,16 0 1,1 54,38 Z"/>
-              <!-- Car Body -->
               <path
                   android:fillColor="#FF6B00"
                   android:pathData="M35,58 L42,46 C43,44 45,43 48,43 L60,43 C63,43 65,44 66,46 L73,58 C76,58 78,60 78,63 L78,68 C78,70 76,71 74,71 L73,71 C73,69 71,67 68,67 C65,67 63,69 63,71 L45,71 C45,69 43,67 40,67 C37,67 35,69 35,71 L34,71 C32,71 30,70 30,68 L30,63 C30,60 32,58 35,58 Z"/>
           </vector>
           EOF
 
-          # 3. Create Notification Icon
+          # Create Notification Icon
           cat << 'EOF' > "$RES_DIR/drawable/ic_notification.xml"
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="24dp"
