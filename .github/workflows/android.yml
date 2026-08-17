@@ -35,7 +35,7 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Auto-generate Clean Android settings.gradle & Fix Kotlin Version
+      - name: Auto-generate Clean Android settings.gradle & Fix Kotlin Override
         run: |
           mkdir -p react-native-app/android
           cat << 'EOF' > react-native-app/android/settings.gradle
@@ -44,23 +44,23 @@ jobs:
           includeBuild('../node_modules/@react-native/gradle-plugin')
           EOF
 
-          # Force Kotlin 2.0.20 in android/build.gradle
           BUILD_GRADLE="react-native-app/android/build.gradle"
           if [ -f "$BUILD_GRADLE" ]; then
-            sed -i 's/kotlinVersion = .*/kotlinVersion = "2.0.20"/' "$BUILD_GRADLE" || true
-            sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "2.0.20"/' "$BUILD_GRADLE" || true
+            # Override any existing kotlinVersion definitions to 1.9.22
+            sed -i 's/kotlinVersion = .*/kotlinVersion = "1.9.22"/' "$BUILD_GRADLE" || true
+            sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.22"/' "$BUILD_GRADLE" || true
+            sed -i 's/org.jetbrains.kotlin.android:1\.[0-9]\+\.[0-9]\+/org.jetbrains.kotlin.android:1.9.22/g' "$BUILD_GRADLE" || true
           fi
 
-          # Inject resolutionStrategy into app/build.gradle to fix Kotlin stdlib alignment
           APP_BUILD_GRADLE="react-native-app/android/app/build.gradle"
           if [ -f "$APP_BUILD_GRADLE" ]; then
             cat << 'EOF' >> "$APP_BUILD_GRADLE"
 
           configurations.all {
               resolutionStrategy {
-                  force 'org.jetbrains.kotlin:kotlin-stdlib:2.0.20'
-                  force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.20'
-                  force 'org.jetbrains.kotlin:kotlin-reflect:2.0.20'
+                  force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
+                  force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22'
+                  force 'org.jetbrains.kotlin:kotlin-reflect:1.9.22'
               }
           }
           EOF
@@ -85,7 +85,6 @@ jobs:
           mkdir -p "$RES_DIR/drawable"
           mkdir -p "$RES_DIR/values"
 
-          # Single source of truth for colors in colors.xml
           cat << 'EOF' > "$RES_DIR/values/colors.xml"
           <resources>
               <color name="ic_launcher_background">#8E8E93</color>
@@ -94,7 +93,6 @@ jobs:
           </resources>
           EOF
 
-          # Create Foreground Vector Icon
           cat << 'EOF' > "$RES_DIR/drawable/ic_launcher_foreground.xml"
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="108dp"
@@ -110,7 +108,6 @@ jobs:
           </vector>
           EOF
 
-          # Create Notification Icon
           cat << 'EOF' > "$RES_DIR/drawable/ic_notification.xml"
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="24dp"
@@ -195,12 +192,12 @@ jobs:
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleDebug --no-daemon -PkotlinVersion=2.0.20
+          ./gradlew assembleDebug --no-daemon
 
       - name: Build React Native Android Release APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleRelease --no-daemon -PkotlinVersion=2.0.20
+          ./gradlew assembleRelease --no-daemon
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
