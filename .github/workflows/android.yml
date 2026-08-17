@@ -1,4 +1,4 @@
-Name: Build React Native Android APK
+name: Build React Native Android APK
 
 on:
   push:
