@@ -30,9 +30,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install React Native Dependencies
+      # 🔥 பழைய lock ஃபைலை நீக்கிவிட்டு புதிய 5.1.0 பதிப்பை மட்டும் இன்ஸ்டால் செய்யும்
+      - name: Force Clean & Install Latest Dependencies
         run: |
           cd react-native-app
+          rm -rf package-lock.json node_modules
           npm install --legacy-peer-deps
 
       - name: Inject google-services.json File
