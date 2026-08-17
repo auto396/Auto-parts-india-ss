@@ -11,6 +11,11 @@ plugins {
     id("com.facebook.react.settings")
 }
 
+// 🔥 மூன்றாம் தரப்பு லைப்ரரிகளுக்கு (node_modules) React பிளக்இன் கிடைக்க இந்த வரி கட்டாயம்
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromCommand()
+}
+
 rootProject.name = 'AutoPartsIndia'
 
 include ':app'
