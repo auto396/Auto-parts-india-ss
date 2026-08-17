@@ -1,4 +1,4 @@
-name: Build React Native Android APK
+Name: Build React Native Android APK
 
 on:
   push:
@@ -48,16 +48,6 @@ jobs:
             console.log('Safe area context build.gradle successfully patched!');
           }
           "
-
-      - name: Auto-generate Proper settings.gradle
-        run: |
-          mkdir -p react-native-app/android
-          cat << 'EOF' > react-native-app/android/settings.gradle
-          rootProject.name = 'AutoPartsIndia'
-          include ':app'
-          apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle");
-          applyNativeModulesSettingsGradle(settings)
-          EOF
 
       - name: Inject google-services.json File
         run: |
@@ -171,48 +161,13 @@ jobs:
           }
           EOF
 
-      - name: Inject Memory & App Build Flags
-        run: |
-          PROP_FILE="react-native-app/android/gradle.properties"
-          echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> "$PROP_FILE"
-          echo "android.useAndroidX=true" >> "$PROP_FILE"
-          echo "android.enableJetifier=true" >> "$PROP_FILE"
-
-          APP_BUILD_GRADLE="react-native-app/android/app/build.gradle"
-          if [ -f "$APP_BUILD_GRADLE" ]; then
-            if ! grep -q "applyNativeModulesAppBuildGradle" "$APP_BUILD_GRADLE"; then
-              cat << 'EOF' >> "$APP_BUILD_GRADLE"
-
-          apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle");
-          applyNativeModulesAppBuildGradle(project)
-          EOF
-            fi
-
-            cat << 'EOF' >> "$APP_BUILD_GRADLE"
-
-          android {
-              buildFeatures {
-                  buildConfig true
-              }
-              kotlinOptions {
-                  freeCompilerArgs += [
-                      "-Xskip-metadata-version-check",
-                      "-Xskip-prerelease-check"
-                  ]
-              }
-          }
-          EOF
-          fi
-
-      - name: Clean Conflicting & Duplicate Resources (BEFORE setup)
+      - name: Clean Conflicting & Duplicate Resources
         run: |
           RES_DIR="react-native-app/android/app/src/main/res"
-          echo "==== Force removing ic_launcher_background.xml files ===="
           rm -f "$RES_DIR/values/ic_launcher_background.xml"
           rm -f "$RES_DIR/drawable/ic_launcher_background.xml"
           find "$RES_DIR" -name "ic_launcher_background.xml" -exec rm -f {} \;
 
-          echo "==== Cleaning duplicate asset drawables ===="
           find "$RES_DIR" -type d -name "drawable-*" | while read -r dir; do
             find "$dir" -type f ! -name "splash_logo.png" ! -name "master_logo.png" ! -name "ic_notification.png" -name "*.png" -exec rm -f {} \;
           done
