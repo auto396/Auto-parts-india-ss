@@ -35,47 +35,127 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Fix Safe Area Context Directories Error (CRITICAL FIX)
+      - name: Inject google-services.json File
         run: |
-          SAFE_AREA_FILE="react-native-app/node_modules/react-native-safe-area-context/android/build.gradle"
-          if [ -f "$SAFE_AREA_FILE" ]; then
-            echo "==== Fixing react-native-safe-area-context directories property ===="
-            sed -i 's/directories/srcDirs/g' "$SAFE_AREA_FILE" || true
-          fi
-
-      - name: Auto-generate Native Autolink settings.gradle
-        run: |
-          mkdir -p react-native-app/android
-          cat << 'EOF' > react-native-app/android/settings.gradle
-          rootProject.name = 'AutoPartsIndia'
-          include ':app'
-          apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle");
-          applyNativeModulesSettingsGradle(settings)
+          mkdir -p react-native-app/android/app
+          cat << 'EOF' > react-native-app/android/app/google-services.json
+          {
+            "project_info": {
+              "project_number": "751764116522",
+              "firebase_url": "https://auto-parts-market-place-20312-default-rtdb.firebaseio.com",
+              "project_id": "auto-parts-market-place-20312",
+              "storage_bucket": "auto-parts-market-place-20312.firebasestorage.app"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:751764116522:android:f4705ee3aed7aa197adf53",
+                  "android_client_info": {
+                    "package_name": "com.autoparts.app"
+                  }
+                },
+                "oauth_client": [
+                  {
+                    "client_id": "751764116522-oc4lurqs2fflbr5fdanlq32343if1e5k.apps.googleusercontent.com",
+                    "client_type": 1,
+                    "android_info": {
+                      "package_name": "com.autoparts.app",
+                      "certificate_hash": "14d6a60e48069f67ccfaa47241797b95d9b5689a"
+                    }
+                  },
+                  {
+                    "client_id": "751764116522-gr59kobj3c3i1hsgr5hiumauk5otr5sq.apps.googleusercontent.com",
+                    "client_type": 3
+                  }
+                ],
+                "api_key": [
+                  {
+                    "current_key": "AIzaSyBTfivYbxE7PDB7FxyAlJjFDid6LKPplx8"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": [
+                      {
+                        "client_id": "751764116522-gr59kobj3c3i1hsgr5hiumauk5otr5sq.apps.googleusercontent.com",
+                        "client_type": 3
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:751764116522:android:96d83dd190f393417adf53",
+                  "android_client_info": {
+                    "package_name": "com.autoparts.india"
+                  }
+                },
+                "oauth_client": [
+                  {
+                    "client_id": "751764116522-gr59kobj3c3i1hsgr5hiumauk5otr5sq.apps.googleusercontent.com",
+                    "client_type": 3
+                  }
+                ],
+                "api_key": [
+                  {
+                    "current_key": "AIzaSyBTfivYbxE7PDB7FxyAlJjFDid6LKPplx8"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": [
+                      {
+                        "client_id": "751764116522-gr59kobj3c3i1hsgr5hiumauk5otr5sq.apps.googleusercontent.com",
+                        "client_type": 3
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:751764116522:android:4244dc4b7a8150f77adf53",
+                  "android_client_info": {
+                    "package_name": "com.autopartsindia"
+                  }
+                },
+                "oauth_client": [
+                  {
+                    "client_id": "751764116522-gr59kobj3c3i1hsgr5hiumauk5otr5sq.apps.googleusercontent.com",
+                    "client_type": 3
+                  }
+                ],
+                "api_key": [
+                  {
+                    "current_key": "AIzaSyBTfivYbxE7PDB7FxyAlJjFDid6LKPplx8"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": [
+                      {
+                        "client_id": "751764116522-gr59kobj3c3i1hsgr5hiumauk5otr5sq.apps.googleusercontent.com",
+                        "client_type": 3
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
           EOF
 
-      - name: Inject Memory & App Autolink Settings
+      - name: Inject Memory & Build Compiler Flags
         run: |
           PROP_FILE="react-native-app/android/gradle.properties"
           echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> "$PROP_FILE"
           echo "android.useAndroidX=true" >> "$PROP_FILE"
           echo "android.enableJetifier=true" >> "$PROP_FILE"
 
-          BUILD_GRADLE="react-native-app/android/build.gradle"
-          if [ -f "$BUILD_GRADLE" ]; then
-            sed -i 's/kotlinVersion = .*/kotlinVersion = "1.9.24"/' "$BUILD_GRADLE" || true
-            sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.24"/' "$BUILD_GRADLE" || true
-          fi
-
           APP_BUILD_GRADLE="react-native-app/android/app/build.gradle"
           if [ -f "$APP_BUILD_GRADLE" ]; then
-            if ! grep -q "applyNativeModulesAppBuildGradle" "$APP_BUILD_GRADLE"; then
-              cat << 'EOF' >> "$APP_BUILD_GRADLE"
-
-          apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle");
-          applyNativeModulesAppBuildGradle(project)
-          EOF
-            fi
-
             cat << 'EOF' >> "$APP_BUILD_GRADLE"
 
           android {
@@ -146,23 +226,6 @@ jobs:
           </vector>
           EOF
 
-      - name: Enable BuildConfig for Third Party Packages
-        run: |
-          for file in react-native-app/node_modules/@react-native-community/datetimepicker/android/build.gradle \
-                      react-native-app/node_modules/@react-native-community/netinfo/android/build.gradle \
-                      react-native-app/node_modules/react-native-image-picker/android/build.gradle; do
-            if [ -f "$file" ]; then
-              cat >> "$file" <<'EOF'
-
-          android {
-              buildFeatures {
-                  buildConfig true
-              }
-          }
-          EOF
-            fi
-          done
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -203,4 +266,3 @@ jobs:
         with:
           name: react-native-release-apk
           path: react-native-app/android/app/build/outputs/apk/release/*.apk
-
