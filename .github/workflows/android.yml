@@ -30,12 +30,25 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # 🔥 பழைய lock ஃபைலை நீக்கிவிட்டு புதிய 5.1.0 பதிப்பை மட்டும் இன்ஸ்டால் செய்யும்
-      - name: Force Clean & Install Latest Dependencies
+      - name: Force Clean & Install Dependencies
         run: |
           cd react-native-app
           rm -rf package-lock.json node_modules
           npm install --legacy-peer-deps
+
+      # 🔥 இந்த படிநிலையில்தான் பிழையான கோப்பு தானாகத் திருத்தப்படுகிறது
+      - name: Patch Safe Area Context directly
+        run: |
+          node -e "
+          const fs = require('fs');
+          const path = 'react-native-app/node_modules/react-native-safe-area-context/android/build.gradle';
+          if (fs.existsSync(path)) {
+            let content = fs.readFileSync(path, 'utf8');
+            content = content.replace(/\.directories/g, '.srcDirs');
+            fs.writeFileSync(path, content, 'utf8');
+            console.log('Safe area context patched successfully!');
+          }
+          "
 
       - name: Inject google-services.json File
         run: |
