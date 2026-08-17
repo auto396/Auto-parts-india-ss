@@ -35,7 +35,7 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Auto-generate Clean Android settings.gradle (Fix layout issue)
+      - name: Auto-generate Clean Android settings.gradle
         run: |
           mkdir -p react-native-app/android
           cat << 'EOF' > react-native-app/android/settings.gradle
@@ -44,7 +44,7 @@ jobs:
           includeBuild('../node_modules/@react-native/gradle-plugin')
           EOF
 
-      - name: Inject Kotlin Metadata & Compiler Flags
+      - name: Inject Memory & Kotlin Compiler Flags
         run: |
           PROP_FILE="react-native-app/android/gradle.properties"
           echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> "$PROP_FILE"
@@ -182,11 +182,10 @@ jobs:
           gradle-version: '8.4'
           validate-wrappers: false
 
-      - name: Ensure Gradle Wrapper Executable
+      - name: Ensure Executable Permissions for Gradlew
         run: |
           cd react-native-app/android
-          gradle wrapper --gradle-version 8.4
-          chmod +x gradlew
+          chmod +x gradlew || true
 
       - name: Ensure Debug Keystore
         run: |
