@@ -35,7 +35,7 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Auto-generate Clean Android settings.gradle & Fix Kotlin/Gradle Properties
+      - name: Auto-generate Clean Android settings.gradle & Fix Build Memory
         run: |
           mkdir -p react-native-app/android
           cat << 'EOF' > react-native-app/android/settings.gradle
@@ -44,44 +44,12 @@ jobs:
           includeBuild('../node_modules/@react-native/gradle-plugin')
           EOF
 
-          # Configure memory & JVM targets in gradle.properties
+          # Configure memory & AndroidX settings
           PROP_FILE="react-native-app/android/gradle.properties"
-          mkdir -p react-native-app/android
           echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> "$PROP_FILE"
           echo "kotlin.daemon.jvmargs=-Xmx2048m" >> "$PROP_FILE"
           echo "android.useAndroidX=true" >> "$PROP_FILE"
           echo "android.enableJetifier=true" >> "$PROP_FILE"
-
-          BUILD_GRADLE="react-native-app/android/build.gradle"
-          if [ -f "$BUILD_GRADLE" ]; then
-            sed -i 's/kotlinVersion = .*/kotlinVersion = "1.9.22"/' "$BUILD_GRADLE" || true
-            sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.22"/' "$BUILD_GRADLE" || true
-          fi
-
-          APP_BUILD_GRADLE="react-native-app/android/app/build.gradle"
-          if [ -f "$APP_BUILD_GRADLE" ]; then
-            cat << 'EOF' >> "$APP_BUILD_GRADLE"
-
-          android {
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
-              }
-              kotlinOptions {
-                  jvmTarget = '17'
-                  freeCompilerArgs += ["-Xskip-prerelease-check", "-Xopt-in=kotlin.RequiresOptIn"]
-              }
-          }
-
-          configurations.all {
-              resolutionStrategy {
-                  force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
-                  force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22'
-                  force 'org.jetbrains.kotlin:kotlin-reflect:1.9.22'
-              }
-          }
-          EOF
-          fi
 
       - name: Clean Conflicting & Duplicate Resources (BEFORE setup)
         run: |
@@ -215,12 +183,12 @@ jobs:
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon
 
       - name: Build React Native Android Release APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleRelease --no-daemon
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
