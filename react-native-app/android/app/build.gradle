@@ -1,5 +1,6 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react" // 🔥 இந்த வரி சேர்க்கப்பட்டுள்ளது!
 
 configurations.all {
     resolutionStrategy {
@@ -76,4 +77,5 @@ dependencies {
 }
 
 apply plugin: "com.google.gms.google-services"
+
 
