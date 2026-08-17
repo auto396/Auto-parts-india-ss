@@ -33,17 +33,11 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Fix Settings and App Gradle Setup
+      - name: Fix Settings setup
         run: |
           cd react-native-app/android
-          
-          # Force clean settings.gradle to properly include :app
           echo "rootProject.name = 'AutoPartsIndia'" > settings.gradle
           echo "include ':app'" >> settings.gradle
-          
-          # Fix gradlew permissions
-          gradle wrapper --gradle-version 8.3
-          chmod +x gradlew
 
       - name: Bundle JS Assets
         run: |
@@ -61,6 +55,8 @@ jobs:
       - name: Build Android Debug APK
         run: |
           cd react-native-app/android
+          gradle wrapper --gradle-version 8.3
+          chmod +x gradlew
           ./gradlew :app:assembleDebug --no-daemon -x createBundleReleaseJsAndAssets -x bundleReleaseJsAndAssets
 
       - name: Upload APK Artifact
