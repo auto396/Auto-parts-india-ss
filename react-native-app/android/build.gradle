@@ -12,10 +12,13 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:8.1.1")
+        classpath("com.android.tools.build:gradle:8.0.2")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("com.google.gms:google-services:4.4.1")
-        classpath("com.facebook.react:react-native-gradle-plugin")
+        
+        // 🔥 இங்கே பதிப்பு எண் (+) சேர்க்கப்பட்டுள்ளது! 
+        // இது பிளக்இனை இணையத்திலிருந்து நேரடியாகத் தரவிறக்கும்.
+        classpath("com.facebook.react:react-native-gradle-plugin:+")
     }
 }
 
