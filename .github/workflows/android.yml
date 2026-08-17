@@ -33,6 +33,48 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
+      - name: Create Missing App Directory Structure (If Not Found)
+        run: |
+          cd react-native-app/android
+          mkdir -p app/src/main/res/values
+          
+          # Create app/build.gradle if it doesn't exist
+          if [ ! -f "app/build.gradle" ]; then
+            echo "Creating missing app/build.gradle..."
+            cat << 'EOF' > app/build.gradle
+          apply plugin: 'com.android.application'
+
+          android {
+              namespace "com.autopartsindia"
+              compileSdkVersion 34
+
+              defaultConfig {
+                  applicationId "com.autopartsindia"
+                  minSdkVersion 23
+                  targetSdkVersion 34
+                  versionCode 1
+                  versionName "1.0"
+              }
+
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                  }
+              }
+          }
+
+          dependencies {
+              implementation 'com.facebook.react:react-android'
+          }
+          EOF
+          fi
+
+          # Ensure settings.gradle is linked
+          cat << 'EOF' > settings.gradle
+          rootProject.name = 'AutoPartsIndia'
+          include ':app'
+          EOF
+
       - name: Bundle JS Assets
         run: |
           cd react-native-app
