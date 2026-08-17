@@ -30,24 +30,10 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install React Native Dependencies (Force Fresh Install)
+      - name: Install React Native Dependencies
         run: |
           cd react-native-app
-          npm install react-native-safe-area-context@4.10.5 --legacy-peer-deps --save
           npm install --legacy-peer-deps
-
-      - name: Auto-Patch Safe Area Context Directory Property if Exists
-        run: |
-          node -e "
-          const fs = require('fs');
-          const path = 'react-native-app/node_modules/react-native-safe-area-context/android/build.gradle';
-          if (fs.existsSync(path)) {
-            let fileContent = fs.readFileSync(path, 'utf8');
-            fileContent = fileContent.replace(/\.directories/g, '.srcDirs');
-            fs.writeFileSync(path, fileContent, 'utf8');
-            console.log('Safe area context build.gradle successfully patched!');
-          }
-          "
 
       - name: Inject google-services.json File
         run: |
@@ -161,18 +147,14 @@ jobs:
           }
           EOF
 
-      - name: Clean Conflicting & Duplicate Resources
+      - name: Clean Conflicting Resources
         run: |
           RES_DIR="react-native-app/android/app/src/main/res"
           rm -f "$RES_DIR/values/ic_launcher_background.xml"
           rm -f "$RES_DIR/drawable/ic_launcher_background.xml"
           find "$RES_DIR" -name "ic_launcher_background.xml" -exec rm -f {} \;
 
-          find "$RES_DIR" -type d -name "drawable-*" | while read -r dir; do
-            find "$dir" -type f ! -name "splash_logo.png" ! -name "master_logo.png" ! -name "ic_notification.png" -name "*.png" -exec rm -f {} \;
-          done
-
-      - name: Setup App Colors & Silver Icon Resources
+      - name: Setup App Colors & Icons
         run: |
           RES_DIR="react-native-app/android/app/src/main/res"
           mkdir -p "$RES_DIR/drawable"
@@ -186,44 +168,16 @@ jobs:
           </resources>
           EOF
 
-          cat << 'EOF' > "$RES_DIR/drawable/ic_launcher_foreground.xml"
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="108dp"
-              android:height="108dp"
-              android:viewportWidth="108"
-              android:viewportHeight="108">
-              <path
-                  android:fillColor="#2C3E50"
-                  android:pathData="M54,30 A24,24 0 1,0 54,78 A24,24 0 1,0 54,30 Z M54,38 A16,16 0 1,1 54,70 A16,16 0 1,1 54,38 Z"/>
-              <path
-                  android:fillColor="#FF6B00"
-                  android:pathData="M35,58 L42,46 C43,44 45,43 48,43 L60,43 C63,43 65,44 66,46 L73,58 C76,58 78,60 78,63 L78,68 C78,70 76,71 74,71 L73,71 C73,69 71,67 68,67 C65,67 63,69 63,71 L45,71 C45,69 43,67 40,67 C37,67 35,69 35,71 L34,71 C32,71 30,70 30,68 L30,63 C30,60 32,58 35,58 Z"/>
-          </vector>
-          EOF
-
-          cat << 'EOF' > "$RES_DIR/drawable/ic_notification.xml"
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="24dp"
-              android:height="24dp"
-              android:viewportWidth="24"
-              android:viewportHeight="24">
-            <path
-                android:fillColor="#FFFFFF"
-                android:pathData="M12,2A2,2 0 0,0 10,4A2,2 0 0,0 10,4.29C7.12,5.14 5,7.82 5,11V17L3,19V20H21V19L19,17V11C19,7.82 16.88,5.14 14,4.29A2,2 0 0,0 14,4A2,2 0 0,0 12,2Z"/>
-          </vector>
-          EOF
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.0.2'
           validate-wrappers: false
 
-      - name: Force Generate Executable Gradlew Wrapper
+      - name: Ensure Executable Gradlew
         run: |
           cd react-native-app/android
-          gradle wrapper --gradle-version 8.0.2
-          chmod +x gradlew
+          chmod +x gradlew || true
 
       - name: Ensure Debug Keystore
         run: |
@@ -235,12 +189,12 @@ jobs:
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleDebug --no-daemon -PkotlinVersion=1.9.24
+          gradle assembleDebug --no-daemon -PkotlinVersion=1.9.24
 
       - name: Build React Native Android Release APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleRelease --no-daemon -PkotlinVersion=1.9.24
+          gradle assembleRelease --no-daemon -PkotlinVersion=1.9.24
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
