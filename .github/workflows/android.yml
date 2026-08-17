@@ -117,6 +117,28 @@ jobs:
             exit 1
           fi
 
+      - name: Enable BuildConfig for Image Picker
+        run: |
+          FILE="react-native-app/node_modules/react-native-image-picker/android/build.gradle"
+
+          if [ -f "$FILE" ]; then
+            echo "Enabling BuildConfig for Image Picker..."
+
+            cat >> "$FILE" <<'EOF'
+
+          android {
+              buildFeatures {
+                  buildConfig true
+              }
+          }
+          EOF
+
+            echo "BuildConfig enabled successfully."
+          else
+            echo "ERROR: Image Picker build.gradle not found."
+            exit 1
+          fi
+
       - name: Clean Conflicting & Duplicate Resources
         run: |
           echo "==== Cleaning conflicting resources ===="
