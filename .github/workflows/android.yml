@@ -95,6 +95,28 @@ jobs:
             exit 1
           fi
 
+      - name: Enable BuildConfig for NetInfo
+        run: |
+          FILE="react-native-app/node_modules/@react-native-community/netinfo/android/build.gradle"
+
+          if [ -f "$FILE" ]; then
+            echo "Enabling BuildConfig for NetInfo..."
+
+            cat >> "$FILE" <<'EOF'
+
+          android {
+              buildFeatures {
+                  buildConfig true
+              }
+          }
+          EOF
+
+            echo "BuildConfig enabled successfully."
+          else
+            echo "ERROR: NetInfo build.gradle not found."
+            exit 1
+          fi
+
       - name: Clean Conflicting & Duplicate Resources
         run: |
           echo "==== Cleaning conflicting resources ===="
