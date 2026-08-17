@@ -35,10 +35,16 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Auto-generate Clean Android settings.gradle
+      - name: Auto-generate Proper React Native Autolink settings.gradle
         run: |
           mkdir -p react-native-app/android
           cat << 'EOF' > react-native-app/android/settings.gradle
+          pluginManagement {
+              includeBuild("../node_modules/@react-native/gradle-plugin")
+          }
+          plugins {
+              id("com.facebook.react.settings")
+          }
           rootProject.name = 'AutoPartsIndia'
           include ':app'
           includeBuild('../node_modules/@react-native/gradle-plugin')
@@ -62,6 +68,9 @@ jobs:
             cat << 'EOF' >> "$APP_BUILD_GRADLE"
 
           android {
+              buildFeatures {
+                  buildConfig true
+              }
               kotlinOptions {
                   freeCompilerArgs += [
                       "-Xskip-metadata-version-check",
