@@ -15,9 +15,6 @@ buildscript {
         classpath("com.android.tools.build:gradle:8.2.1")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("com.google.gms:google-services:4.4.1")
-        
-        // 🔥 இந்த வரியை பதிப்பு எண்சார்ந்த பிரச்சனையின்றி உள்ளே அமைப்பது அவசியம்
-        classpath("com.facebook.react:react-native-gradle-plugin:0.76.5")
     }
 }
 
