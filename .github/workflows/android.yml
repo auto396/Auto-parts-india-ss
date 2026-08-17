@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
@@ -56,7 +57,7 @@ jobs:
           EOF
 
           else
-            echo "settings.gradle already exists. Verifying ':app' and rootProject inclusion..."
+            echo "settings.gradle already exists."
 
             if ! grep -q "include ':app'" react-native-app/android/settings.gradle; then
               echo "include ':app'" >> react-native-app/android/settings.gradle
@@ -72,22 +73,44 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
+      - name: Enable BuildConfig for DateTimePicker
+        run: |
+          FILE="react-native-app/node_modules/@react-native-community/datetimepicker/android/build.gradle"
+
+          if [ -f "$FILE" ]; then
+            echo "Enabling BuildConfig for DateTimePicker..."
+
+            cat >> "$FILE" <<'EOF'
+
+          android {
+              buildFeatures {
+                  buildConfig true
+              }
+          }
+          EOF
+
+            echo "BuildConfig enabled successfully."
+          else
+            echo "ERROR: DateTimePicker build.gradle not found."
+            exit 1
+          fi
+
       - name: Clean Conflicting & Duplicate Resources
         run: |
-          echo "==== Step 1: Cleaning conflicting ic_launcher_background.xml files ===="
+          echo "==== Cleaning conflicting resources ===="
 
           find react-native-app/android/app/src/main/res \
             -name "ic_launcher_background.xml" \
             ! -path "*/values/*" \
             -exec rm -f {} \;
 
-          echo "==== Step 2: Preventing duplicate asset resources ===="
+          echo "==== Cleaning duplicate drawable assets ===="
 
           find react-native-app/android/app/src/main/res \
             -type d \
             -name "drawable-*" | while read -r dir; do
 
-            echo "Cleaning up generated assets in $dir"
+            echo "Cleaning $dir"
 
             find "$dir" \
               -type f \
@@ -105,10 +128,12 @@ jobs:
           gradle-version: '8.8'
           validate-wrappers: false
 
-      - name: Ensure Gradle Wrapper Executable (v8.8)
+      - name: Ensure Gradle Wrapper Executable
         run: |
           cd react-native-app/android
+
           gradle wrapper --gradle-version 8.8
+
           chmod +x gradlew
 
       - name: Ensure Debug Keystore
@@ -116,7 +141,7 @@ jobs:
           cd react-native-app/android/app
 
           if [ ! -f "debug.keystore" ]; then
-            echo "debug.keystore is missing. Auto-generating development signing key..."
+            echo "Generating debug keystore..."
 
             keytool -genkey -v \
               -keystore debug.keystore \
@@ -129,17 +154,19 @@ jobs:
               -dname "CN=Android Debug,O=Android,C=US" \
               -storetype PKCS12
           else
-            echo "debug.keystore is already present."
+            echo "Debug keystore already exists."
           fi
 
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
+
           ./gradlew assembleDebug --no-daemon
 
       - name: Build React Native Android Release APK
         run: |
           cd react-native-app/android
+
           ./gradlew assembleRelease --no-daemon
 
       - name: Upload Debug APK Artifact
