@@ -1,4 +1,4 @@
-name: Build React Native Android APK
+Name: Build React Native Android APK
 
 on:
   push:
@@ -216,13 +216,13 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.4'
+          gradle-version: '8.1.1'
           validate-wrappers: false
 
       - name: Force Generate Executable Gradlew Wrapper
         run: |
           cd react-native-app/android
-          gradle wrapper --gradle-version 8.4
+          gradle wrapper --gradle-version 8.1.1
           chmod +x gradlew
 
       - name: Ensure Debug Keystore
