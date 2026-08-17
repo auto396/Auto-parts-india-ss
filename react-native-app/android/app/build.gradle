@@ -1,6 +1,8 @@
-apply plugin: "com.android.application"
-apply plugin: "org.jetbrains.kotlin.android"
-apply plugin: "com.facebook.react"
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("com.facebook.react")
+}
 
 configurations.all {
     resolutionStrategy {
@@ -10,15 +12,15 @@ configurations.all {
 }
 
 android {
-    ndkVersion "26.1.10909125"  // 🔥 நேரடியாக கொடுக்கப்பட்டுள்ளது
-    buildToolsVersion "34.0.0"   // 🔥 நேரடியாக கொடுக்கப்பட்டுள்ளது
-    compileSdk 34                // 🔥 compileSdk பிழைக்கான தீர்வு
+    ndkVersion "26.1.10909125"
+    buildToolsVersion "34.0.0"
+    compileSdk 34
 
     namespace "com.autopartsindia"
     defaultConfig {
         applicationId "com.autopartsindia"
         minSdkVersion 24
-        targetSdkVersion 34      // 🔥 நேரடியாக கொடுக்கப்பட்டுள்ளது
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0.0"
     }
