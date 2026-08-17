@@ -35,22 +35,17 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Auto-generate Clean Android settings.gradle
+      - name: Auto-generate Native Autolink settings.gradle
         run: |
           mkdir -p react-native-app/android
           cat << 'EOF' > react-native-app/android/settings.gradle
-          pluginManagement {
-              includeBuild("../node_modules/@react-native/gradle-plugin")
-          }
-          plugins {
-              id("com.facebook.react.settings")
-          }
           rootProject.name = 'AutoPartsIndia'
           include ':app'
-          includeBuild('../node_modules/@react-native/gradle-plugin')
+          apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle");
+          applyNativeModulesSettingsGradle(settings)
           EOF
 
-      - name: Inject Memory, BuildConfig & Fix App Gradle Plugin
+      - name: Inject Memory & App Autolink Settings
         run: |
           PROP_FILE="react-native-app/android/gradle.properties"
           echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> "$PROP_FILE"
@@ -65,11 +60,15 @@ jobs:
 
           APP_BUILD_GRADLE="react-native-app/android/app/build.gradle"
           if [ -f "$APP_BUILD_GRADLE" ]; then
-            # Apply React Native plugin if not already applied
-            if ! grep -q "com.facebook.react" "$APP_BUILD_GRADLE"; then
-              sed -i '1i apply plugin: "com.facebook.react"' "$APP_BUILD_GRADLE"
+            # Inject native_modules.gradle autolink into app/build.gradle if missing
+            if ! grep -q "applyNativeModulesAppBuildGradle" "$APP_BUILD_GRADLE"; then
+              cat << 'EOF' >> "$APP_BUILD_GRADLE"
+
+          apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle");
+          applyNativeModulesAppBuildGradle(project)
+          EOF
             fi
-            
+
             cat << 'EOF' >> "$APP_BUILD_GRADLE"
 
           android {
@@ -85,12 +84,6 @@ jobs:
           }
           EOF
           fi
-
-      - name: Force React Native CLI Autolink & Codegen
-        run: |
-          cd react-native-app
-          npx react-native config || true
-          npx @react-native-community/cli config || true
 
       - name: Clean Conflicting & Duplicate Resources (BEFORE setup)
         run: |
@@ -196,20 +189,16 @@ jobs:
             sed -i 's/\.directories =/\.srcDirs =/g' "$FILE" || true
           fi
 
-      - name: Setup Gradle & Auto-generate Gradle Wrapper
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.4'
           validate-wrappers: false
 
-      - name: Ensure Gradlew Script Exists and Executable
+      - name: Ensure Executable Permissions for Gradlew
         run: |
           cd react-native-app/android
-          if [ ! -f "gradlew" ]; then
-            echo "gradlew not found, generating Gradle Wrapper 8.4..."
-            gradle wrapper --gradle-version 8.4
-          fi
-          chmod +x gradlew
+          chmod +x gradlew || true
 
       - name: Ensure Debug Keystore
         run: |
@@ -239,4 +228,3 @@ jobs:
         with:
           name: react-native-release-apk
           path: react-native-app/android/app/build/outputs/apk/release/*.apk
-
