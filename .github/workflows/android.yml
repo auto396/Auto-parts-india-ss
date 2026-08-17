@@ -1,4 +1,4 @@
-name: Build React Native Android APK
+Name: Build React Native Android APK
 
 on:
   push:
@@ -96,11 +96,6 @@ jobs:
           gradle-version: '8.2.1'
           validate-wrappers: false
 
-      - name: Ensure Executable Gradlew
-        run: |
-          cd react-native-app/android
-          chmod +x gradlew || true
-
       - name: Ensure Debug Keystore
         run: |
           cd react-native-app/android/app
@@ -108,15 +103,16 @@ jobs:
             keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" -storetype PKCS12
           fi
 
+      # 🔥 gradlew-க்கு பதிலாக நேரடியாக gradle கட்டளை பயன்படுத்தப்பட்டுள்ளது
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleDebug --no-daemon
+          gradle assembleDebug --no-daemon
 
       - name: Build React Native Android Release APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleRelease --no-daemon
+          gradle assembleRelease --no-daemon
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
@@ -129,4 +125,4 @@ jobs:
         with:
           name: react-native-release-apk
           path: react-native-app/android/app/build/outputs/apk/release/*.apk
-          
+
