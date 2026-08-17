@@ -44,21 +44,20 @@ jobs:
           includeBuild('../node_modules/@react-native/gradle-plugin')
           EOF
 
-          # Align Kotlin version in build.gradle if present
           if [ -f "react-native-app/android/build.gradle" ]; then
             sed -i 's/kotlinVersion = .*/kotlinVersion = "1.9.24"/' react-native-app/android/build.gradle || true
             sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.24"/' react-native-app/android/build.gradle || true
           fi
 
-      - name: Clean Conflicting & Duplicate Resources
+      - name: Clean Conflicting & Duplicate Resources (BEFORE setup)
         run: |
           RES_DIR="react-native-app/android/app/src/main/res"
-          echo "==== Step 1: Force deleting duplicate ic_launcher_background XML files ===="
+          echo "==== Force removing ic_launcher_background.xml files ===="
           rm -f "$RES_DIR/values/ic_launcher_background.xml"
           rm -f "$RES_DIR/drawable/ic_launcher_background.xml"
           find "$RES_DIR" -name "ic_launcher_background.xml" -exec rm -f {} \;
 
-          echo "==== Step 2: Preventing duplicate asset resources ===="
+          echo "==== Cleaning duplicate asset drawables ===="
           find "$RES_DIR" -type d -name "drawable-*" | while read -r dir; do
             find "$dir" -type f ! -name "splash_logo.png" ! -name "master_logo.png" ! -name "ic_notification.png" -name "*.png" -exec rm -f {} \;
           done
@@ -69,7 +68,7 @@ jobs:
           mkdir -p "$RES_DIR/drawable"
           mkdir -p "$RES_DIR/values"
 
-          # 1. Single source of truth for colors in colors.xml
+          # Single source of truth for colors in colors.xml
           cat << 'EOF' > "$RES_DIR/values/colors.xml"
           <resources>
               <color name="ic_launcher_background">#8E8E93</color>
@@ -78,7 +77,7 @@ jobs:
           </resources>
           EOF
 
-          # 2. Create Car & Gear Foreground Vector Icon
+          # Create Foreground Vector Icon
           cat << 'EOF' > "$RES_DIR/drawable/ic_launcher_foreground.xml"
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="108dp"
@@ -94,7 +93,7 @@ jobs:
           </vector>
           EOF
 
-          # 3. Create Notification Icon
+          # Create Notification Icon
           cat << 'EOF' > "$RES_DIR/drawable/ic_notification.xml"
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="24dp"
