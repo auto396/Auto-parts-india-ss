@@ -39,6 +39,14 @@ jobs:
           echo "rootProject.name = 'AutoPartsIndia'" > settings.gradle
           echo "include ':app'" >> settings.gradle
 
+      - name: Remove Duplicate Resources
+        run: |
+          # Remove duplicate ic_launcher_background from colors.xml if present
+          COLOR_FILE="react-native-app/android/app/src/main/res/values/colors.xml"
+          if [ -f "$COLOR_FILE" ]; then
+            sed -i '/ic_launcher_background/d' "$COLOR_FILE" || true
+          fi
+
       - name: Bundle JS Assets
         run: |
           cd react-native-app
