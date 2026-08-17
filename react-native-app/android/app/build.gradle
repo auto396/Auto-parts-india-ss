@@ -1,6 +1,13 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib:2.0.21'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21'
+    }
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -69,3 +76,4 @@ dependencies {
 }
 
 apply plugin: "com.google.gms.google-services"
+
