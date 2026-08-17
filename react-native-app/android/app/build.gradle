@@ -1,12 +1,8 @@
-apply plugin: "com.android.application"
-apply plugin: "org.jetbrains.kotlin.android"
-apply plugin: "com.facebook.react"
-
-project.ext.react = [
-    enableHermes: true
-]
-
-apply from: "../../node_modules/react-native/react.gradle"
+plugins {
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+    id "com.facebook.react"
+}
 
 configurations.all {
     resolutionStrategy {
