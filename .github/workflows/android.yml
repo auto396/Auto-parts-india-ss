@@ -35,7 +35,6 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      # Safe Area Context பிழையைத் தவிர்க்கும் லினக்ஸ் ஸ்கிரிப்ட்
       - name: Patch Safe Area Context
         run: |
           sed -i '/directories/d' react-native-app/node_modules/react-native-safe-area-context/android/build.gradle || true
@@ -89,19 +88,11 @@ jobs:
           </resources>
           EOF
 
-      # React Native 0.76.5-க்குத் தேவையான Gradle 8.8
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.8'
           validate-wrappers: false
-
-      # missing gradlew கோப்பைத் தானாக உருவாக்கும் படிநிலை
-      - name: Generate Gradle Wrapper
-        run: |
-          cd react-native-app/android
-          gradle wrapper
-          chmod +x gradlew
 
       - name: Ensure Debug Keystore
         run: |
@@ -113,12 +104,12 @@ jobs:
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleDebug --no-daemon
+          gradle assembleDebug --no-daemon
 
       - name: Build React Native Android Release APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleRelease --no-daemon
+          gradle assembleRelease --no-daemon
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
