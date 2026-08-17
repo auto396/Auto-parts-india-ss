@@ -36,17 +36,17 @@ jobs:
           rm -rf package-lock.json node_modules
           npm install --legacy-peer-deps
 
-      # 🔥 UnsupportedOperationException பிழையைத் தவிர்க்கும் புதியPatch
-      - name: Fix Safe Area Context UnsupportedOperationException
+      # 🔥 105-வது வரியில் உள்ள பிரச்சனை தரும் லூப்பை அடியோடு நீக்கும் புதுமையான Patch
+      - name: Wipe out problematic Safe Area Context loop
         run: |
           node -e "
           const fs = require('fs');
           const path = 'react-native-app/node_modules/react-native-safe-area-context/android/build.gradle';
           if (fs.existsSync(path)) {
-            let content = fs.readFileSync(path, 'utf8');
-            content = content.replace(/android\.sourceSets\.main\.getBuilder\(\)\.directories\.forEach[\s\S]*?\}/g, 'android.sourceSets.main.java.srcDirs = [\"src/main/java\"]');
-            fs.writeFileSync(path, content, 'utf8');
-            console.log('Safe area context build.gradle successfully repaired!');
+            let lines = fs.readFileSync(path, 'utf8').split('\n');
+            let cleanLines = lines.filter(line => !line.includes('directories'));
+            fs.writeFileSync(path, cleanLines.join('\n'), 'utf8');
+            console.log('Safe area context build.gradle successfully cleaned!');
           }
           "
 
