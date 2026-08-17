@@ -33,47 +33,17 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Create Missing App Directory Structure (If Not Found)
+      - name: Fix Settings and App Gradle Setup
         run: |
           cd react-native-app/android
-          mkdir -p app/src/main/res/values
           
-          # Create app/build.gradle if it doesn't exist
-          if [ ! -f "app/build.gradle" ]; then
-            echo "Creating missing app/build.gradle..."
-            cat << 'EOF' > app/build.gradle
-          apply plugin: 'com.android.application'
-
-          android {
-              namespace "com.autopartsindia"
-              compileSdkVersion 34
-
-              defaultConfig {
-                  applicationId "com.autopartsindia"
-                  minSdkVersion 23
-                  targetSdkVersion 34
-                  versionCode 1
-                  versionName "1.0"
-              }
-
-              buildTypes {
-                  release {
-                      minifyEnabled false
-                  }
-              }
-          }
-
-          dependencies {
-              implementation 'com.facebook.react:react-android'
-          }
-          EOF
-          fi
-
-          # Ensure settings.gradle is linked
-          cat << 'EOF' > settings.gradle
-          rootProject.name = 'AutoPartsIndia'
-          include ':app'
-          EOF
+          # Force clean settings.gradle to properly include :app
+          echo "rootProject.name = 'AutoPartsIndia'" > settings.gradle
+          echo "include ':app'" >> settings.gradle
+          
+          # Fix gradlew permissions
+          gradle wrapper --gradle-version 8.3
+          chmod +x gradlew
 
       - name: Bundle JS Assets
         run: |
@@ -91,9 +61,7 @@ jobs:
       - name: Build Android Debug APK
         run: |
           cd react-native-app/android
-          gradle wrapper --gradle-version 8.3
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon -x createBundleReleaseJsAndAssets -x bundleReleaseJsAndAssets
+          ./gradlew :app:assembleDebug --no-daemon -x createBundleReleaseJsAndAssets -x bundleReleaseJsAndAssets
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
