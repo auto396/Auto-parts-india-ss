@@ -39,16 +39,17 @@ jobs:
           echo "rootProject.name = 'AutoPartsIndia'" > settings.gradle
           echo "include ':app'" >> settings.gradle
 
-      - name: Setup Silver Vector App Icon & Resources
+      - name: Setup App Colors & Resources
         run: |
           RES_DIR="react-native-app/android/app/src/main/res"
           mkdir -p "$RES_DIR/drawable"
           mkdir -p "$RES_DIR/values"
 
-          # 1. Set Silver/Grey Background Color (#8E8E93)
+          # 1. Update colors.xml with dark_navy & launcher background
           cat << 'EOF' > "$RES_DIR/values/colors.xml"
           <resources>
               <color name="ic_launcher_background">#8E8E93</color>
+              <color name="dark_navy">#0F172A</color>
               <color name="primary_blue">#0066FF</color>
           </resources>
           EOF
