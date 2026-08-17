@@ -35,60 +35,48 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Auto-generate Clean Android settings.gradle & Inject Global Kotlin Compatibility
+      - name: Auto-generate Proper React Native Autolink settings.gradle
         run: |
           mkdir -p react-native-app/android
           cat << 'EOF' > react-native-app/android/settings.gradle
+          pluginManagement {
+              includeBuild("../node_modules/@react-native/gradle-plugin")
+          }
+          plugins {
+              id("com.facebook.react.settings")
+          }
+          extensions.configure(com.facebook.react.ReactSettingsExtension){
+              it.autolinkLibrariesFromCommand()
+          }
+
           rootProject.name = 'AutoPartsIndia'
           include ':app'
           includeBuild('../node_modules/@react-native/gradle-plugin')
           EOF
 
-          # Configure memory & AndroidX settings in gradle.properties
+      - name: Inject Kotlin Metadata & Compiler Flags (Fix Kotlin 2.2.0 Mismatch)
+        run: |
           PROP_FILE="react-native-app/android/gradle.properties"
           echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> "$PROP_FILE"
-          echo "kotlin.daemon.jvmargs=-Xmx2048m" >> "$PROP_FILE"
           echo "android.useAndroidX=true" >> "$PROP_FILE"
           echo "android.enableJetifier=true" >> "$PROP_FILE"
 
-          # Force JVM 17 and Kotlin compatibility across ALL modules
+          BUILD_GRADLE="react-native-app/android/build.gradle"
+          if [ -f "$BUILD_GRADLE" ]; then
+            sed -i 's/kotlinVersion = .*/kotlinVersion = "2.2.0"/' "$BUILD_GRADLE" || true
+            sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "2.2.0"/' "$BUILD_GRADLE" || true
+          fi
+
           APP_BUILD_GRADLE="react-native-app/android/app/build.gradle"
           if [ -f "$APP_BUILD_GRADLE" ]; then
             cat << 'EOF' >> "$APP_BUILD_GRADLE"
 
-          subprojects {
-              afterEvaluate { project ->
-                  if (project.hasProperty("android")) {
-                      project.android {
-                          compileOptions {
-                              sourceCompatibility JavaVersion.VERSION_17
-                              targetCompatibility JavaVersion.VERSION_17
-                          }
-                          if (project.plugins.hasPlugin("kotlin-android") || project.plugins.hasPlugin("org.jetbrains.kotlin.android")) {
-                              kotlinOptions {
-                                  jvmTarget = "17"
-                              }
-                          }
-                      }
-                  }
-              }
-          }
-
           android {
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
-              }
               kotlinOptions {
-                  jvmTarget = "17"
-              }
-          }
-
-          configurations.all {
-              resolutionStrategy {
-                  force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.24'
-                  force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24'
-                  force 'org.jetbrains.kotlin:kotlin-reflect:1.9.24'
+                  freeCompilerArgs += [
+                      "-Xskip-metadata-version-check",
+                      "-Xskip-prerelease-check"
+                  ]
               }
           }
           EOF
@@ -147,12 +135,6 @@ jobs:
                 android:pathData="M12,2A2,2 0 0,0 10,4A2,2 0 0,0 10,4.29C7.12,5.14 5,7.82 5,11V17L3,19V20H21V19L19,17V11C19,7.82 16.88,5.14 14,4.29A2,2 0 0,0 14,4A2,2 0 0,0 12,2Z"/>
           </vector>
           EOF
-
-      - name: Pre-bundle JS Assets
-        run: |
-          cd react-native-app
-          mkdir -p android/app/src/main/assets
-          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/ || true
 
       - name: Enable BuildConfig for DateTimePicker
         run: |
@@ -226,12 +208,12 @@ jobs:
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleDebug --no-daemon -PkotlinVersion=1.9.24
+          ./gradlew assembleDebug --no-daemon -PkotlinVersion=2.2.0
 
       - name: Build React Native Android Release APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleRelease --no-daemon -PkotlinVersion=1.9.24
+          ./gradlew assembleRelease --no-daemon -PkotlinVersion=2.2.0
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
