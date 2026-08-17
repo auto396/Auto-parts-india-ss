@@ -15,8 +15,13 @@ buildscript {
         classpath("com.android.tools.build:gradle:8.2.1")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("com.google.gms:google-services:4.4.1")
+        
+        // 🔥 Local node_modules-ல் இருந்து React Native plugin-ஐ சேர்க்கிறது
+        classpath files("../node_modules/react-native/gradle/react.gradle")
     }
 }
+
+apply plugin: "com.facebook.react"
 
 allprojects {
     repositories {
@@ -26,6 +31,7 @@ allprojects {
     }
 }
 
+// BuildConfig பிழையைத் தடுக்கும் அமைப்பு
 subprojects { subproject ->
     afterEvaluate {
         if (subproject.hasProperty('android')) {
