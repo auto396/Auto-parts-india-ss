@@ -1,106 +1,39 @@
 {
-  "project_info": {
-    "project_number": "751764116522",
-    "firebase_url": "https://auto-parts-market-place-20312-default-rtdb.firebaseio.com",
-    "project_id": "auto-parts-market-place-20312",
-    "storage_bucket": "auto-parts-market-place-20312.firebasestorage.app"
+  "name": "autopartsindia",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "jest",
+    "lint": "eslint ."
   },
-  "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:751764116522:android:f4705ee3aed7aa197adf53",
-        "android_client_info": {
-          "package_name": "com.autoparts.app"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "751764116522-oc4lurqs2fflbr5fdanlq32343if1e5k.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.autoparts.app",
-            "certificate_hash": "14d6a60e48069f67ccfaa47241797b95d9b5689a"
-          }
-        },
-        {
-          "client_id": "751764116522-gr59kobj3c3i1hsgr5hiumauk5otr5sq.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBTfivYbxE7PDB7FxyAlJjFDid6LKPplx8"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "751764116522-gr59kobj3c3i1hsgr5hiumauk5otr5sq.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:751764116522:android:96d83dd190f393417adf53",
-        "android_client_info": {
-          "package_name": "com.autoparts.india"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "751764116522-gr59kobj3c3i1hsgr5hiumauk5otr5sq.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBTfivYbxE7PDB7FxyAlJjFDid6LKPplx8"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "751764116522-gr59kobj3c3i1hsgr5hiumauk5otr5sq.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:751764116522:android:4244dc4b7a8150f77adf53",
-        "android_client_info": {
-          "package_name": "com.autopartsindia"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "751764116522-gr59kobj3c3i1hsgr5hiumauk5otr5sq.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBTfivYbxE7PDB7FxyAlJjFDid6LKPplx8"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "751764116522-gr59kobj3c3i1hsgr5hiumauk5otr5sq.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    }
-  ],
-  "configuration_version": "1"
+  "dependencies": {
+    "@react-native-community/datetimepicker": "^7.6.1",
+    "@react-native-community/netinfo": "^11.3.1",
+    "@react-native-firebase/app": "^21.14.0",
+    "@react-native-firebase/messaging": "^21.14.0",
+    "react": "18.2.0",
+    "react-native": "0.73.6",
+    "react-native-image-picker": "^7.1.0",
+    "react-native-safe-area-context": "^4.10.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@babel/preset-env": "^7.20.0",
+    "@babel/runtime": "^7.20.0",
+    "@react-native/babel-preset": "0.73.21",
+    "@react-native/eslint-config": "0.73.2",
+    "@react-native/metro-config": "0.73.5",
+    "@react-native/typescript-config": "0.73.1",
+    "babel-jest": "^29.6.3",
+    "eslint": "^8.19.0",
+    "jest": "^29.6.3",
+    "prettier": "2.8.8",
+    "typescript": "5.0.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
 }
