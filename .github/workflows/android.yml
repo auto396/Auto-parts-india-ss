@@ -35,8 +35,8 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      # Safe Area Context & Directories பிரச்சனையை அடியோடு நீக்கும் பாதுகாப்பான கட்டளை
-      - name: Patch Problematic Gradle Files
+      # Safe Area Context பிழையைத் தவிர்க்கும் லினக்ஸ் ஸ்கிரிப்ட்
+      - name: Patch Safe Area Context
         run: |
           sed -i '/directories/d' react-native-app/node_modules/react-native-safe-area-context/android/build.gradle || true
 
@@ -89,12 +89,19 @@ jobs:
           </resources>
           EOF
 
-      # React Native 0.76-க்கு ஏற்ற 100% Stable Gradle 8.2.1
+      # React Native 0.76.5-க்குத் தேவையான Gradle 8.8
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.2.1'
+          gradle-version: '8.8'
           validate-wrappers: false
+
+      # missing gradlew கோப்பைத் தானாக உருவாக்கும் படிநிலை
+      - name: Generate Gradle Wrapper
+        run: |
+          cd react-native-app/android
+          gradle wrapper
+          chmod +x gradlew
 
       - name: Ensure Debug Keystore
         run: |
@@ -103,16 +110,15 @@ jobs:
             keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" -storetype PKCS12
           fi
 
-      # 🔥 gradlew-க்கு பதிலாக நேரடியாக gradle கட்டளை பயன்படுத்தப்பட்டுள்ளது
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          gradle assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon
 
       - name: Build React Native Android Release APK
         run: |
           cd react-native-app/android
-          gradle assembleRelease --no-daemon
+          ./gradlew assembleRelease --no-daemon
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
@@ -125,4 +131,3 @@ jobs:
         with:
           name: react-native-release-apk
           path: react-native-app/android/app/build/outputs/apk/release/*.apk
-
