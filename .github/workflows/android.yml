@@ -35,6 +35,30 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
+      - name: Fix Safe Area Context & Enable BuildConfig for Packages
+        run: |
+          # 1. Fix safe-area-context 'directories' API error
+          SAFE_FILE="react-native-app/node_modules/react-native-safe-area-context/android/build.gradle"
+          if [ -f "$SAFE_FILE" ]; then
+            sed -i 's/\.directories/\.srcDirs/g' "$SAFE_FILE" || true
+          fi
+
+          # 2. Enable buildConfig explicitly inside third-party build.gradle files
+          for file in react-native-app/node_modules/@react-native-community/datetimepicker/android/build.gradle \
+                      react-native-app/node_modules/@react-native-community/netinfo/android/build.gradle \
+                      react-native-app/node_modules/react-native-image-picker/android/build.gradle; do
+            if [ -f "$file" ]; then
+              cat >> "$file" <<'EOF'
+
+          android {
+              buildFeatures {
+                  buildConfig true
+              }
+          }
+          EOF
+            fi
+          done
+
       - name: Auto-generate Proper settings.gradle
         run: |
           mkdir -p react-native-app/android
@@ -157,31 +181,12 @@ jobs:
           }
           EOF
 
-      - name: Inject Memory, Global BuildConfig & Compiler Flags
+      - name: Inject Memory & Build Compiler Flags
         run: |
           PROP_FILE="react-native-app/android/gradle.properties"
           echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> "$PROP_FILE"
           echo "android.useAndroidX=true" >> "$PROP_FILE"
           echo "android.enableJetifier=true" >> "$PROP_FILE"
-
-          # Force BuildConfig true globally for all subprojects (node_modules)
-          ROOT_BUILD_GRADLE="react-native-app/android/build.gradle"
-          if [ -f "$ROOT_BUILD_GRADLE" ]; then
-            cat << 'EOF' >> "$ROOT_BUILD_GRADLE"
-
-          subprojects {
-              afterEvaluate { project ->
-                  if (project.hasProperty("android")) {
-                      project.android {
-                          buildFeatures {
-                              buildConfig true
-                          }
-                      }
-                  }
-              }
-          }
-          EOF
-          fi
 
           APP_BUILD_GRADLE="react-native-app/android/app/build.gradle"
           if [ -f "$APP_BUILD_GRADLE" ]; then
