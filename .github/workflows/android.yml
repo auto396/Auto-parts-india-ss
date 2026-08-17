@@ -137,6 +137,12 @@ jobs:
           </vector>
           EOF
 
+      - name: Pre-bundle JS Assets
+        run: |
+          cd react-native-app
+          mkdir -p android/app/src/main/assets
+          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/ || true
+
       - name: Enable BuildConfig for DateTimePicker
         run: |
           FILE="react-native-app/node_modules/@react-native-community/datetimepicker/android/build.gradle"
@@ -209,12 +215,12 @@ jobs:
       - name: Build React Native Android Debug APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Build React Native Android Release APK
         run: |
           cd react-native-app/android
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleRelease --no-daemon --stacktrace
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
