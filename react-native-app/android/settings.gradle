@@ -1,4 +1,5 @@
 pluginManagement {
+    // React Native 0.76 requires the Gradle settings plugin from the local node_modules build
     includeBuild("../node_modules/@react-native/gradle-plugin")
     repositories {
         google()
