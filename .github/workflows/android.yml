@@ -1,4 +1,4 @@
-name: Build React Native Android APK
+Name: Build React Native Android APK
 
 on:
   push:
@@ -34,6 +34,11 @@ jobs:
         run: |
           cd react-native-app
           npm install --legacy-peer-deps
+
+      # 🔥 105-வது வரியில் உள்ள பிழையான வரியை நேரடியாக நீக்கும் எளிய கட்டளை
+      - name: Directly Remove Problematic Directories Line
+        run: |
+          sed -i '/directories/d' react-native-app/node_modules/react-native-safe-area-context/android/build.gradle
 
       - name: Inject google-services.json File
         run: |
@@ -123,3 +128,4 @@ jobs:
         with:
           name: react-native-release-apk
           path: react-native-app/android/app/build/outputs/apk/release/*.apk
+          
