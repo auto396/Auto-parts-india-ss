@@ -50,13 +50,26 @@ jobs:
             sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.24"/' react-native-app/android/build.gradle || true
           fi
 
+      - name: Clean Conflicting & Duplicate Resources
+        run: |
+          RES_DIR="react-native-app/android/app/src/main/res"
+          echo "==== Step 1: Force deleting duplicate ic_launcher_background XML files ===="
+          rm -f "$RES_DIR/values/ic_launcher_background.xml"
+          rm -f "$RES_DIR/drawable/ic_launcher_background.xml"
+          find "$RES_DIR" -name "ic_launcher_background.xml" -exec rm -f {} \;
+
+          echo "==== Step 2: Preventing duplicate asset resources ===="
+          find "$RES_DIR" -type d -name "drawable-*" | while read -r dir; do
+            find "$dir" -type f ! -name "splash_logo.png" ! -name "master_logo.png" ! -name "ic_notification.png" -name "*.png" -exec rm -f {} \;
+          done
+
       - name: Setup App Colors & Silver Icon Resources
         run: |
           RES_DIR="react-native-app/android/app/src/main/res"
           mkdir -p "$RES_DIR/drawable"
           mkdir -p "$RES_DIR/values"
 
-          # 1. Update colors.xml with dark_navy & launcher background
+          # 1. Single source of truth for colors in colors.xml
           cat << 'EOF' > "$RES_DIR/values/colors.xml"
           <resources>
               <color name="ic_launcher_background">#8E8E93</color>
@@ -143,14 +156,6 @@ jobs:
             sed -i 's/\.directories /\.srcDirs /g' "$FILE" || true
             sed -i 's/\.directories =/\.srcDirs =/g' "$FILE" || true
           fi
-
-      - name: Clean Conflicting & Duplicate Resources
-        run: |
-          find react-native-app/android/app/src/main/res -name "ic_launcher_background.xml" ! -path "*/values/*" -exec rm -f {} \;
-          
-          find react-native-app/android/app/src/main/res -type d -name "drawable-*" | while read -r dir; do
-            find "$dir" -type f ! -name "splash_logo.png" ! -name "master_logo.png" ! -name "ic_notification.png" -name "*.png" -exec rm -f {} \;
-          done
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
