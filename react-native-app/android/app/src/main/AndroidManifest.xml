@@ -1,4 +1,9 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.autopartsindia">
+
+    <!-- Override MinSDK requirement for React Native 0.87+ libraries -->
+    <uses-sdk tools:overrideLibrary="com.facebook.react" />
 
     <!-- Network & Internet Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
