@@ -35,15 +35,23 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Fix Safe Area Context & Enable BuildConfig for Packages
+      - name: Patch Safe Area Context & Enable BuildConfig Cleanly
         run: |
-          # 1. Fix safe-area-context 'directories' API error
-          SAFE_FILE="react-native-app/node_modules/react-native-safe-area-context/android/build.gradle"
-          if [ -f "$SAFE_FILE" ]; then
-            sed -i 's/\.directories/\.srcDirs/g' "$SAFE_FILE" || true
-          fi
+          # Safe Area Context Fix via Python (Avoids Sed Syntax Errors)
+          python3 -c "
+          path = 'react-native-app/node_modules/react-native-safe-area-context/android/build.gradle'
+          try:
+              with open(path, 'r') as f:
+                  content = f.read()
+              content = content.replace('.directories', '.srcDirs')
+              with open(path, 'w') as f:
+                  f.write(content)
+              print('Successfully patched safe-area-context')
+          except Exception as e:
+              print('Safe area patch skipped/error:', e)
+          "
 
-          # 2. Enable buildConfig explicitly inside third-party build.gradle files
+          # Enable buildConfig explicitly inside third-party modules
           for file in react-native-app/node_modules/@react-native-community/datetimepicker/android/build.gradle \
                       react-native-app/node_modules/@react-native-community/netinfo/android/build.gradle \
                       react-native-app/node_modules/react-native-image-picker/android/build.gradle; do
@@ -308,3 +316,4 @@ jobs:
         with:
           name: react-native-release-apk
           path: react-native-app/android/app/build/outputs/apk/release/*.apk
+
