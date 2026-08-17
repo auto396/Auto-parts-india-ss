@@ -1,0 +1,9 @@
+diff --git a/node_modules/react-native-safe-area-context/android/build.gradle b/node_modules/react-native-safe-area-context/android/build.gradle
+index 1234567..89abcde 100640
+--- a/node_modules/react-native-safe-area-context/android/build.gradle
++++ b/node_modules/react-native-safe-area-context/android/build.gradle
+@@ -102,5 +102,3 @@ android {
+ }
+ 
+-android.sourceSets.main.getBuilder().directories.forEach {
+-}
