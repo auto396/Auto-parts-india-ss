@@ -35,7 +35,7 @@ jobs:
           cd react-native-app
           npm install --legacy-peer-deps
 
-      - name: Auto-generate Clean Android settings.gradle & Fix Kotlin Override
+      - name: Auto-generate Clean Android settings.gradle & Fix Kotlin/Gradle Properties
         run: |
           mkdir -p react-native-app/android
           cat << 'EOF' > react-native-app/android/settings.gradle
@@ -44,17 +44,34 @@ jobs:
           includeBuild('../node_modules/@react-native/gradle-plugin')
           EOF
 
+          # Configure memory & JVM targets in gradle.properties
+          PROP_FILE="react-native-app/android/gradle.properties"
+          mkdir -p react-native-app/android
+          echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> "$PROP_FILE"
+          echo "kotlin.daemon.jvmargs=-Xmx2048m" >> "$PROP_FILE"
+          echo "android.useAndroidX=true" >> "$PROP_FILE"
+          echo "android.enableJetifier=true" >> "$PROP_FILE"
+
           BUILD_GRADLE="react-native-app/android/build.gradle"
           if [ -f "$BUILD_GRADLE" ]; then
-            # Override any existing kotlinVersion definitions to 1.9.22
             sed -i 's/kotlinVersion = .*/kotlinVersion = "1.9.22"/' "$BUILD_GRADLE" || true
             sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.22"/' "$BUILD_GRADLE" || true
-            sed -i 's/org.jetbrains.kotlin.android:1\.[0-9]\+\.[0-9]\+/org.jetbrains.kotlin.android:1.9.22/g' "$BUILD_GRADLE" || true
           fi
 
           APP_BUILD_GRADLE="react-native-app/android/app/build.gradle"
           if [ -f "$APP_BUILD_GRADLE" ]; then
             cat << 'EOF' >> "$APP_BUILD_GRADLE"
+
+          android {
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+              kotlinOptions {
+                  jvmTarget = '17'
+                  freeCompilerArgs += ["-Xskip-prerelease-check", "-Xopt-in=kotlin.RequiresOptIn"]
+              }
+          }
 
           configurations.all {
               resolutionStrategy {
