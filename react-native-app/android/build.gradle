@@ -15,6 +15,9 @@ buildscript {
         classpath("com.android.tools.build:gradle:8.2.1")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("com.google.gms:google-services:4.4.1")
+        // React Native 0.76.5 exposes the Gradle plugin through the local package and nested libraries
+        // such as react-native-screens call apply plugin: "com.facebook.react" during configuration,
+        // so the root buildscript must include the local plugin artifact as well as the included build.
         classpath(files("$rootDir/../node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/build/libs/react-native-gradle-plugin.jar"))
     }
 }
