@@ -1,5 +1,4 @@
 pluginManagement {
-    // React Native 0.76 plugin lookup
     includeBuild("../node_modules/@react-native/gradle-plugin")
     repositories {
         google()
@@ -9,7 +8,7 @@ pluginManagement {
 }
 
 plugins {
-    id("com.facebook.react.settings")
+    id("com.facebook.react.settings") apply false
 }
 
 rootProject.name = 'AutoPartsIndia'
